@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: future-ai-systems-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: future-ai-systems-dashboard
+  template:
+    metadata:
+      labels:
+        app: future-ai-systems-dashboard
+    spec:
+      containers:
+        - name: dashboard
+          image: python:3.11-slim
+          workingDir: /app
+          command: ["/bin/sh", "-c"]
+          args:
+            - pip install -r requirements.txt && streamlit run dashboard/app.py --server.port 8501 --server.address 0.0.0.0
+          ports:
+            - containerPort: 8501

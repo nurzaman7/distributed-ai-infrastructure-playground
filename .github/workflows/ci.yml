@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-perf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compile check
+        run: python -m compileall api core dashboard tests benchmarks
+
+      - name: Unit tests
+        run: pytest -q tests
+
+      - name: Start API
+        run: |
+          uvicorn api.server:app --host 127.0.0.1 --port 8080 > /tmp/api.log 2>&1 &
+          sleep 3
+
+      - name: Performance gate
+        env:
+          BENCH_BASE_URL: http://127.0.0.1:8080
+          BENCH_COUNT: "150"
+          PERF_MAX_P95_MS: "600"
+          PERF_MAX_ERROR_RATE: "0.10"
+        run: python -m benchmarks.perf_gate

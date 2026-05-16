@@ -1,0 +1,8 @@
+service:
+  name: future-ai-systems
+  env: dev
+tracing:
+  sample_rate: 1.0
+storage:
+  trace_jsonl: ./data/traces/traces.jsonl
+  rollup_jsonl: ./data/metrics/rollups.jsonl
