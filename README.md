@@ -1,12 +1,14 @@
-# Future AI Systems (Distributed AI Infrastructure Playground)
+# Distributed AI Infrastructure Playground
 
-A production-inspired AI infrastructure playground for learning and building systems across:
-- Deep Learning
-- Distributed Systems
-- Observability
-- HPC-style optimization concepts
+[![CI](https://github.com/nurzaman7/distributed-ai-infrastructure-playground/actions/workflows/ci.yml/badge.svg)](https://github.com/nurzaman7/distributed-ai-infrastructure-playground/actions/workflows/ci.yml)
 
-This repository is focused on runnable infrastructure patterns, not toy model demos.
+A runnable playground for the systems side of LLM serving: request tracing,
+worker pools with retries and fault injection, KV-cache and continuous-batching
+behaviour, and the observability needed to see what is happening under load.
+
+Model inference is simulated on purpose. No GPU or model weights are needed,
+so the routing, queueing, failure and telemetry paths can be exercised on a
+laptop and in CI.
 
 ## What Is Implemented
 
@@ -75,6 +77,12 @@ Open:
 - API docs: `http://localhost:8080/docs`
 - Dashboard: `http://localhost:8501`
 
+Run the tests:
+
+```bash
+pytest -q tests
+```
+
 ## Quick Start (Docker)
 
 ```bash
@@ -89,9 +97,9 @@ Run synthetic benchmark:
 python -m benchmarks.run_benchmark --base-url http://localhost:8080 --count 300
 ```
 
-CI performance gate uses:
-- `benchmarks/perf_gate.py`
-- thresholds configured in `.github/workflows/ci.yml`
+CI runs the unit tests, then starts the API and runs `benchmarks/perf_gate.py`
+against it; the build fails if p95 latency or the error rate exceeds the
+thresholds set in `.github/workflows/ci.yml`.
 
 ## Repository Layout
 

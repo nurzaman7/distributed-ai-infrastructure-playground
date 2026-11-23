@@ -224,6 +224,15 @@ def set_fault_scenario(payload: FaultScenarioRequest) -> dict:
 
 
 # ------------------ Phase 3 APIs ------------------
+# Registered before /phase3/kv/{key}: FastAPI matches routes in declaration
+# order, so the parameterised route would otherwise capture "metrics" as a key.
+@app.get("/phase3/kv/metrics")
+def kv_metrics() -> dict:
+    m = kv_cache.metrics()
+    m["estimated_kv_memory_mb"] = estimate_kv_memory_mb(m["tokens_stored"])  # fp16-like baseline
+    return m
+
+
 @app.get("/phase3/kv/{key}")
 def kv_get(key: str) -> dict:
     return {"key": key, "cached_tokens": kv_cache.lookup(key), "metrics": kv_cache.metrics()}
@@ -233,13 +242,6 @@ def kv_get(key: str) -> dict:
 def kv_put(payload: KVPutRequest) -> dict:
     kv_cache.put(payload.key, payload.token_count)
     return {"status": "ok", "metrics": kv_cache.metrics()}
-
-
-@app.get("/phase3/kv/metrics")
-def kv_metrics() -> dict:
-    m = kv_cache.metrics()
-    m["estimated_kv_memory_mb"] = estimate_kv_memory_mb(m["tokens_stored"])  # fp16-like baseline
-    return m
 
 
 @app.post("/phase3/batch/submit")
